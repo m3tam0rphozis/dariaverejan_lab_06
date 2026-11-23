@@ -1,83 +1,91 @@
-def insertion_sort(lista):
-    arr = lista[:]
-    for i in range(1, len(arr)):
-        cheie = arr[i]
+def insertion_sort(v):
+    for i in range(1, len(v)):
+        aux = v[i]
         j = i - 1
-        while j >= 0 and arr[j] > cheie:
-            arr[j + 1] = arr[j]
-            j -= 1
-        arr[j + 1] = cheie
-    return arr
+        while j >= 0 and v[j] > aux:
+            v[j + 1] = v[j]
+            j = j - 1
+        v[j + 1] = aux
+    return v
 
 
-def merge_sort(lista):
-    if len(lista) <= 1:
-        return lista
+def merge_sort(v):
+    if len(v) <= 1:
+        return v
 
-    mijloc = len(lista) // 2
-    stanga = merge_sort(lista[:mijloc])
-    dreapta = merge_sort(lista[mijloc:])
+    mij = len(v) // 2
+    st = merge_sort(v[:mij])
+    dr = merge_sort(v[mij:])
 
-    rezultat = []
-    i = j = 0
-    while i < len(stanga) and j < len(dreapta):
-        if stanga[i] <= dreapta[j]:
-            rezultat.append(stanga[i])
-            i += 1
+    rez = []
+    i = 0
+    j = 0
+    while i < len(st) and j < len(dr):
+        if st[i] < dr[j]:
+            rez.append(st[i])
+            i = i + 1
         else:
-            rezultat.append(dreapta[j])
-            j += 1
+            rez.append(dr[j])
+            j = j + 1
 
-    rezultat.extend(stanga[i:])
-    rezultat.extend(dreapta[j:])
-    return rezultat
+    while i < len(st):
+        rez.append(st[i])
+        i = i + 1
+
+    while j < len(dr):
+        rez.append(dr[j])
+        j = j + 1
+
+    return rez
 
 
-def main():
-    try:
-        with open("date.txt", "r", encoding="utf-8") as f:
-            continut = f.read()
-            linii = [linie.strip() for linie in continut.splitlines() if linie.strip()]
+try:
+    f = open("date.txt", "r")
+    linii = f.readlines()
+    f.close()
 
-        if len(linii) < 2:
-            print("Eroare: Fisierul date.txt trebuie sa contina cel putin 2 linii (numerele si algoritmul).")
-            return
+    if len(linii) < 2:
+        print("Fisierul nu are destule linii.")
+    else:
+        linie1 = linii[0].strip()
+        alg = linii[1].strip()
 
-        elemente_text = linii[0].split()
-        if not elemente_text:
-            print("Eroare: Prima linie nu contine numere.")
-            return
-
-        numere = []
-        for elem in elemente_text:
-            try:
-                numere.append(int(elem))
-            except ValueError:
-                print(f"Eroare: '{elem}' nu este un numar intreg valid.")
-                return
-
-        algoritm = linii[1].strip()
-        if algoritm == "Insertion":
-            sortate = insertion_sort(numere)
-        elif algoritm == "Merge":
-            sortate = merge_sort(numere)
+        if linie1 == "":
+            print("Nu exista numere pe prima linie.")
         else:
-            print(f"Eroare: Algoritmul '{algoritm}' nu este suportat. Alege 'Insertion' sau 'Merge'.")
-            return
+            parti = linie1.split()
+            numere = []
+            date_ok = True
 
-        text_sortat = " ".join(str(x) for x in sortate)
-        linie_rezultat = f"{algoritm}: {text_sortat}"
+            for x in parti:
+                try:
+                    numere.append(int(x))
+                except ValueError:
+                    date_ok = False
+                    break
 
-        with open("date.txt", "a", encoding="utf-8") as f:
-            if not continut.endswith("\n"):
-                f.write("\n")
-            f.write(linie_rezultat + "\n")
+            if not date_ok:
+                print("Date invalide! Prima linie trebuie sa contina doar numere intregi.")
+            elif alg != "Insertion" and alg != "Merge":
+                print("Algoritm invalid! Alege Insertion sau Merge.")
+            else:
+                if alg == "Insertion":
+                    rezultat = insertion_sort(numere)
+                else:
+                    rezultat = merge_sort(numere)
 
-        print(f"Succes! Rezultatul a fost adaugat in date.txt -> {linie_rezultat}")
+                sir_rezultat = ""
+                for nr in rezultat:
+                    sir_rezultat = sir_rezultat + str(nr) + " "
+                sir_rezultat = sir_rezultat.strip()
 
-    except FileNotFoundError:
-        print("Eroare: Fisierul 'date.txt' nu a fost gasit.")
+                f = open("date.txt", "a")
+                if not linii[-1].endswith("\n"):
+                    f.write("\n")
+                f.write(alg + ": " + sir_rezultat + "\n")
+                f.close()
 
+                print("Rezultatul a fost scris in date.txt:", alg + ": " + sir_rezultat)
 
-if __name__ == "__main__":
-    main()
+except FileNotFoundError:
+    print("Nu s-a gasit fisierul date.txt.")
